@@ -15,9 +15,16 @@ const { randomBytes, createHash } = require('crypto');
  */
 const createPrivateKey = () => {
   // Enter your solution here
+  // Generate a private key with secp
+  let privKey, output
+  do {
+    privKey = randomBytes(32);
+  } while (!secp256k1.privateKeyVerify(privKey))
 
+  return privKey.toString('hex');
 };
 
+//console.log(createPrivateKey())
 /**
  * A function which takes a hexadecimal private key and returns its public pair
  * as a 66 character hexadecimal string.
@@ -34,8 +41,9 @@ const createPrivateKey = () => {
 const getPublicKey = privateKey => {
   // Your code here
 
+  return secp256k1.publicKeyCreate(Buffer.from(privateKey, 'hex')).toString('hex');
 };
-
+//console.log(getPublicKey('833bef782c37e89af81c94cd91afda1f8d815a26c11098c217552581edde8a1c'))
 /**
  * A function which takes a hex private key and a string message, returning
  * a 128 character hexadecimal signature.
@@ -51,8 +59,13 @@ const getPublicKey = privateKey => {
  */
 const sign = (privateKey, message) => {
   // Your code here
-
+  const hash = createHash('sha256').update(message).digest();
+  const sigObj = secp256k1.sign(hash, Buffer.from(privateKey, 'hex'));
+  return sigObj.signature.toString('hex');
 };
+//console.log(sign(createPrivateKey(), 'Hello World'));
+
+
 
 /**
  * A function which takes a hex public key, a string message, and a hex
@@ -66,7 +79,10 @@ const sign = (privateKey, message) => {
  */
 const verify = (publicKey, message, signature) => {
   // Your code here
-
+  const msgHash = createHash('sha256').update(message).digest();
+  const sig = Buffer.from(signature, 'hex');
+  const pub = Buffer.from(publicKey, 'hex');
+  return secp256k1.verify(msgHash, sig, pub);
 };
 
 module.exports = {

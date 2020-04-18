@@ -22,8 +22,12 @@ class Transaction {
    *     other properties, signed with the provided private key
    */
   constructor(privateKey, recipient, amount) {
-    // Enter your solution here
-
+    this.source = signing.getPublicKey(privateKey);
+    this.recipient = recipient;
+    this.amount = Number(amount);
+    // can format the message differently but this way for tests
+    const message = `${this.source}${recipient}${amount}`;
+    this.signature = signing.sign(privateKey, message);
   }
 }
 
@@ -45,7 +49,12 @@ class Block {
    */
   constructor(transactions, previousHash) {
     // Your code here
+    this.transactions = transactions;
+    this.previousHash = previousHash;
+    this.nonce = 69000;
 
+    // Added this to create the hash so that the hash is not undefined
+    this.calculateHash(this.nonce);
   }
 
   /**
@@ -59,6 +68,9 @@ class Block {
    */
   calculateHash(nonce) {
     // Your code here
+    this.nonce = nonce;
+    const message = this.transactions + 'Ryan and Jordan Rule this shit!' + this.previousHash + nonce;
+    this.hash = createHash('sha256').update(message).digest('hex');
 
   }
 }
@@ -78,16 +90,14 @@ class Blockchain {
    *   - blocks: an array of blocks, starting with one genesis block
    */
   constructor() {
-    // Your code here
-
+    this.blocks = [new Block([], null)];
   }
 
   /**
    * Simply returns the last block added to the chain.
    */
   getHeadBlock() {
-    // Your code here
-
+    return this.blocks[this.blocks.length - 1]
   }
 
   /**
@@ -96,7 +106,7 @@ class Blockchain {
    */
   addBlock(transactions) {
     // Your code here
-
+    this.blocks.push(new Block(transactions, this.getHeadBlock().hash))
   }
 
   /**
@@ -109,10 +119,60 @@ class Blockchain {
    *   we make the blockchain mineable later.
    */
   getBalance(publicKey) {
-    // Your code here
-
+    let balance = 0;
+    // we will iterate over all blocks
+    this.blocks.forEach(block => {
+      // we then iterate over every transaction in the block
+      block.transactions.forEach(transaction => {
+        // Subtract from balance if publickey is the sender/source
+        if (transaction.source == publicKey) {
+          balance -= transaction.amount;
+          // Add to balance if publickey is recipient
+        } else if (transaction.recipient == publicKey) {
+          balance += transaction.amount;
+        }
+      });
+    });
+    // let recd = 0;
+    // let sent = 0;
+    // const sentArr = [];
+    // this.blocks
+    //   .forEach(block => sentArr
+    //     .push(block.transactions
+    //       .filter(transaction => transaction.source === publicKey)));
+    // const recieveArr = [];
+    // this.blocks
+    //   .forEach(block => sentArr
+    //     .push(block.transactions
+    //       .filter(transaction => transaction.recipient === publicKey)));
+    // if (sentArr.length == 0 && recieveArr.length == 0)return 0
+    // if (recieveArr.length)recd = recieveArr.map(transaction => transaction.amount).reduce((a, b) => a + b);
+    // if (sentArr.length)sent = sentArr.map(transaction => transaction.amount).reduce((a, b) => a + b);
+    return balance;
   }
 }
+
+const blockchain = new Blockchain()
+let person1 = '08d5364254370208718e91b6e16c511c1b11940ae9f1f3fcdba3c6a910865af7'
+let person2 = '102e52e52f6c96940db22093d0fd71f1fb000f4686b811129ca35fa4e79ff062'
+const signer = person1;
+const recipient = signing.getPublicKey(person2);
+for (let i =0; i < 10; i++) {
+  const transCnt = Math.round(Math.random() * 10);
+  const transactions = [];
+  for (let j = 0; j < transCnt; j++) {
+    transactions.push(new Transaction(signer, recipient, 100));
+    // Add some random transactions that wont be in the balance for person2 listed above
+    for (let k = 0; k < transCnt; k++) {
+      transactions.push(new Transaction(signing.createPrivateKey(), signing.getPublicKey(person1)));
+    }
+  }
+  blockchain.addBlock(transactions);
+}
+const transaction = new Transaction(signer, recipient, 100);
+  blockchain.addBlock([transaction]);
+console.log(blockchain.getBalance(signing.getPublicKey(person2)));
+console.log(blockchain.getHeadBlock());
 
 module.exports = {
   Transaction,
