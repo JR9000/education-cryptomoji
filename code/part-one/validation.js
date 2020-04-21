@@ -27,7 +27,7 @@ return signing.verify(transaction.source, `${transaction.source}${transaction.re
  */
 const isValidBlock = block => {
   // Your code here
-  // if (block.hash !== block.calculateHash(block.nonce)) return false;
+  if (block.hash !== block.calculateHash(block.nonce)) return false;
   if (block.transactions.length) {
     for (let i = 0; i < block.transactions.length; i += 1) {
       if (!isValidTransaction(block.transactions[i])) {
@@ -49,9 +49,18 @@ const isValidBlock = block => {
  *   - contains any invalid transactions
  */
 const isValidChain = blockchain => {
-  // Your code here
-
+  // Check that the genisis block is accurate
+  if (blockchain.blocks[0].previousHash !== null || blockchain.blocks[0].transactions.length > 0) return false;
+  // Iterate through all of the blocks in the blockchain
+  for (let i = 1; i < blockchain.blocks.length; i += 1) {
+    // Check that the previous hash matches the hash of the previous block
+    if (blockchain.blocks[i].previousHash !== blockchain.blocks[i-1].hash)return false;
+    // Check that current block passes as a valid block
+    if (!isValidBlock(blockchain.blocks[i]))return false;
+  }
+  return true;
 };
+
 
 /**
  * This last one is just for fun. Become a hacker and tamper with the passed in
@@ -60,6 +69,7 @@ const isValidChain = blockchain => {
  */
 const breakChain = blockchain => {
   // Your code here
+
 
 };
 

@@ -77,7 +77,7 @@ class Block {
     }
     const message = amount + 'Ryan and Jordan Rule this shit!' + this.previousHash + nonce;
     this.hash = createHash('sha256').update(message).digest('hex');
-
+    return this.hash;
   }
 }
 
@@ -148,6 +148,13 @@ class Blockchain {
 // let person2 = '102e52e52f6c96940db22093d0fd71f1fb000f4686b811129ca35fa4e79ff062'
 // const signer = person1;
 // const recipient = signing.getPublicKey(person2);
+// let transactions = [new Transaction(signer, recipient, 100)]
+// blockchain.addBlock(transactions);
+// let headblock = blockchain.getHeadBlock();
+// console.log(headblock.hash)
+// console.log(headblock.hash != headblock.calculateHash(headblock.nonce));
+// console.log(headblock.hash)
+// console.log(headblock.calculateHash(headblock.nonce))
 // for (let i =0; i < 10; i++) {
 //   const transCnt = Math.round(Math.random() * 10);
 //   const transactions = [];
