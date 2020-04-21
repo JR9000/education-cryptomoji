@@ -11,7 +11,11 @@ const signing = require('./signing');
  *   - have been modified since signing
  */
 const isValidTransaction = transaction => {
-  // Enter your solution here
+  // Check that the properties are of the correct length and that the amount is greater than zero
+ if (transaction.amount <= 0 || transaction.signature.length != 128 || transaction.recipient.length != 66 || transaction.source.length != 66)return false;
+ // After the initial check verify that the signature is authentic
+return signing.verify(transaction.source, `${transaction.source}${transaction.recipient}${transaction.amount}`, transaction.signature);
+
 
 };
 
@@ -23,7 +27,15 @@ const isValidTransaction = transaction => {
  */
 const isValidBlock = block => {
   // Your code here
-
+  // if (block.hash !== block.calculateHash(block.nonce)) return false;
+  if (block.transactions.length) {
+    for (let i = 0; i < block.transactions.length; i += 1) {
+      if (!isValidTransaction(block.transactions[i])) {
+        return false;
+      }
+    }
+  }
+  return true;
 };
 
 /**
