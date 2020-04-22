@@ -69,8 +69,11 @@ const isValidChain = blockchain => {
  */
 const breakChain = blockchain => {
   // Your code here
-
-
+  // Iterate through the blocks of the blockchain skipping the genisis block
+  let blockIndex = Math.floor(Math.random() * blockchain.blocks.length);
+  blockIndex = blockIndex > 0 ? blockIndex : 1;
+  const transIndex = Math.floor(Math.random() * blockchain.blocks[blockIndex].transactions.length);
+  blockchain.blocks[blockIndex].transactions[transIndex].amount*=(Math.random())+1
 };
 
 module.exports = {

@@ -48,12 +48,10 @@ class Block {
    *   - hash: a unique hash string generated from the other properties
    */
   constructor(transactions, previousHash) {
-    // Your code here
     this.transactions = transactions;
     this.previousHash = previousHash;
     this.nonce = 69000;
-
-    // Added this to create the hash so that the hash is not undefined
+    // Create the hash so that the hash is not undefined
     this.calculateHash(this.nonce);
   }
 
@@ -67,11 +65,10 @@ class Block {
    *   properties change.
    */
   calculateHash(nonce) {
-    // Your code here
     this.nonce = nonce;
     let amount;
     if (this.transactions.length) {
-      amount = this.transactions.map(transaction => transaction.amount).reduce((a,b)=>a+b);
+      amount = this.transactions.map(transaction => transaction.amount).reduce((a, b) => a + b);
     } else {
       amount = 0;
     }
@@ -142,35 +139,6 @@ class Blockchain {
     return balance;
   }
 }
-
-// const blockchain = new Blockchain()
-// let person1 = '08d5364254370208718e91b6e16c511c1b11940ae9f1f3fcdba3c6a910865af7'
-// let person2 = '102e52e52f6c96940db22093d0fd71f1fb000f4686b811129ca35fa4e79ff062'
-// const signer = person1;
-// const recipient = signing.getPublicKey(person2);
-// let transactions = [new Transaction(signer, recipient, 100)]
-// blockchain.addBlock(transactions);
-// let headblock = blockchain.getHeadBlock();
-// console.log(headblock.hash)
-// console.log(headblock.hash != headblock.calculateHash(headblock.nonce));
-// console.log(headblock.hash)
-// console.log(headblock.calculateHash(headblock.nonce))
-// for (let i =0; i < 10; i++) {
-//   const transCnt = Math.round(Math.random() * 10);
-//   const transactions = [];
-//   for (let j = 0; j < transCnt; j++) {
-//     transactions.push(new Transaction(signer, recipient, 100));
-//     // Add some random transactions that wont be in the balance for person2 listed above
-//     for (let k = 0; k < transCnt; k++) {
-//       transactions.push(new Transaction(signing.createPrivateKey(), signing.getPublicKey(person1), 12));
-//     }
-//   }
-//   blockchain.addBlock(transactions);
-
-// }
-// const transaction = new Transaction(signer, recipient, 100);
-//   blockchain.addBlock([transaction]);
-// console.log(blockchain.getBalance(signing.getPublicKey(person2)));
 
 module.exports = {
   Transaction,

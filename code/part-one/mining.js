@@ -18,8 +18,27 @@ class MineableTransaction {
    * signer.
    */
   constructor(privateKey, recipient = null, amount) {
-    // Enter your solution here
 
+    // If the recipient is null
+    if (recipient === null) {
+      // Set the recipient to the sources/signers publickey
+      this.recipient = signing.getPublicKey(privateKey);
+      // Set the source to null
+      this.source = null;
+    // Else the recipient is not null
+    } else {
+      // Set source to the publickey of the privatekey
+      this.source = signing.getPublicKey(privateKey);
+      // Set recipient to the recipient publicKey provided
+      this.recipient = recipient;
+    }
+    // At the end
+    // Set the amount to the amount
+    this.amount = amount;
+    // Create unique message
+    const message = `${this.source}${recipient}${amount}`;
+    // Set signature aka Sign the unique message with the private key
+    this.signature = signing.sign(privateKey, message);
   }
 }
 
@@ -34,7 +53,14 @@ class MineableBlock extends Block {
    * become valid after it is mined.
    */
   constructor(transactions, previousHash) {
-    // Your code here
+    // Set the transactions
+    // Set the previousHash from the headblock hash
+    // Must call parent constructor since this extends Block
+    super(transactions, previousHash);
+    this.hash = undefined;
+    // Enjoy
+
+    // Consider that the original Block may need to be refactored for when there is no nonce?
 
   }
 }
@@ -62,15 +88,20 @@ class MineableChain extends Blockchain {
    *   This will only be used internally.
    */
   constructor() {
-    // Your code here
-
+    // Generate the genesis block
+    super();
+    // Set the difficulty to 2 though im curious how a decimal would react
+    this.difficulty = 2;
+    // Set the reward to a reasonable amount Perhaps research the reward for other blockchains and halve or double that
+    this.reward = 10;
+    // Define variable for pending transactions
+    this.pending = [];
   }
 
-  /**
-   * No more adding blocks directly.
+   /* No more adding blocks directly.
    */
   addBlock() {
-    throw new Error('Must mine to add blocks to this blockchain');
+    throw new Error('Must mine to add blocks to this blockchain! (ノಠ益ಠ)ノ彡┻━┻');
   }
 
   /**
@@ -78,9 +109,11 @@ class MineableChain extends Blockchain {
    * mineable transaction and simply store it until it can be mined.
    */
   addTransaction(transaction) {
-    // Your code here
 
-  }
+    // Add transaction to the pending transaction array
+    this.pending.push(transaction);
+    // Consider having to check its validity first?
+    }
 
   /**
    * This method takes a private key, and uses it to create a new transaction
@@ -97,11 +130,42 @@ class MineableChain extends Blockchain {
    *   Don't forget to clear your pending transactions after you're done.
    */
   mine(privateKey) {
-    // Your code here
+
+    // Define variables (nonce and hash)
+    let nonce = 0;
+    let hash = "";
+    // mutate nonce variable and generate hash WHILE it does not begin with zeros * difficulty.
+    // Consider using String.repeat([count]) and string.substring for comparisons so that there is only a single line of code to alter when an increase in difficulty is desired.
+    let newBlock = new Block(this.pending, this.getHeadBlock().hash);
+    while (hash.substring(0, this.difficulty + 1) != '0'.repeat(this.difficulty)) {
+      hash = newBlock.calculateHash(nonce);
+      nonce += 1;
+      if (nonce % 1000 == 0)console.log('Mining - nonce='+nonce)
+    }
+    // When the hash meets requirements
+    // Create a reward transaction with the privateKey
+    const reward = new MineableTransaction(privateKey);
+    // Add that transaction to the pending transactions
+    this.addTransaction(reward);
+    // Create a block with pending transactions
+    this.blocks.push(newBlock);
+    // Reset the pending transactions array
+    this.pending = [];
 
   }
 }
+let blockchain = new MineableChain();
 
+const signer = signing.createPrivateKey();
+const recipient = signing.getPublicKey(signing.createPrivateKey());
+const amount = Math.ceil(Math.random() * 100);
+let transaction = new MineableTransaction(signer, recipient, amount);
+
+let miner = signing.createPrivateKey();
+blockchain.addTransaction(transaction);
+blockchain.mine(miner);
+console.log('yay')
+/**
 /**
  * A new validation function for our mineable blockchains. Forget about all the
  * signature and hash validation we did before. Our old validation functions
@@ -118,7 +182,22 @@ class MineableChain extends Blockchain {
  *     funds they don't have
  */
 const isValidMineableChain = blockchain => {
-  // Your code here
+
+  // Iterate through blockchain starting at Index 1 to skip the genesis block
+    // Return false if hash does not match requirements
+    // Consider using the String.repeat([count]) and String.substring from above
+    // Define variable for count of reward transactions
+    // Iterate through transactions of current block
+      // If count is greater than 1
+        // return false
+      // Else If current transaction source is null
+        // If the amount is different than the reward amount
+          // return false
+      // Else If current transaction source would be negative
+        // return false
+
+  // Otherwise after all its a valid chain
+  // return true
 
 };
 
