@@ -25,7 +25,7 @@ class MineableTransaction {
       this.recipient = signing.getPublicKey(privateKey);
       // Set the source to null
       this.source = null;
-    // Else the recipient is not null
+      // Else the recipient is not null
     } else {
       // Set source to the publickey of the privatekey
       this.source = signing.getPublicKey(privateKey);
@@ -90,16 +90,18 @@ class MineableChain extends Blockchain {
   constructor() {
     // Generate the genesis block
     super();
+    //this.blocks = [new MineableBlock([], null)]
+    //this.blocks[0].calculateHash(0);
     // Set the difficulty to 2 though im curious how a decimal would react
-    this.difficulty = 2;
+    this.difficulty = 3;
     // Set the reward to a reasonable amount Perhaps research the reward for other blockchains and halve or double that
     this.reward = 10;
     // Define variable for pending transactions
     this.pending = [];
   }
 
-   /* No more adding blocks directly.
-   */
+  /* No more adding blocks directly.
+  */
   addBlock() {
     throw new Error('Must mine to add blocks to this blockchain! (ノಠ益ಠ)ノ彡┻━┻');
   }
@@ -113,7 +115,7 @@ class MineableChain extends Blockchain {
     // Add transaction to the pending transaction array
     this.pending.push(transaction);
     // Consider having to check its validity first?
-    }
+  }
 
   /**
    * This method takes a private key, and uses it to create a new transaction
@@ -133,38 +135,47 @@ class MineableChain extends Blockchain {
 
     // Define variables (nonce and hash)
     let nonce = 0;
-    let hash = "";
     // mutate nonce variable and generate hash WHILE it does not begin with zeros * difficulty.
     // Consider using String.repeat([count]) and string.substring for comparisons so that there is only a single line of code to alter when an increase in difficulty is desired.
-    let newBlock = new Block(this.pending, this.getHeadBlock().hash);
-    while (hash.substring(0, this.difficulty + 1) != '0'.repeat(this.difficulty)) {
-      hash = newBlock.calculateHash(nonce);
-      nonce += 1;
-      if (nonce % 1000 == 0)console.log('Mining - nonce='+nonce)
-    }
-    // When the hash meets requirements
     // Create a reward transaction with the privateKey
     const reward = new MineableTransaction(privateKey);
+    reward.amount = this.reward;
     // Add that transaction to the pending transactions
     this.addTransaction(reward);
-    // Create a block with pending transactions
+    let newBlock = new MineableBlock(this.pending, this.getHeadBlock().hash);
+
+    do {
+      nonce += 1;
+    }
+    while (newBlock.calculateHash(nonce).substring(0, this.difficulty) != '0'.repeat(this.difficulty))
+
+    // When the hash meets requirements
     this.blocks.push(newBlock);
+
     // Reset the pending transactions array
     this.pending = [];
 
   }
 }
-let blockchain = new MineableChain();
 
-const signer = signing.createPrivateKey();
-const recipient = signing.getPublicKey(signing.createPrivateKey());
-const amount = Math.ceil(Math.random() * 100);
-let transaction = new MineableTransaction(signer, recipient, amount);
+// let blockchain = new MineableChain();
 
-let miner = signing.createPrivateKey();
-blockchain.addTransaction(transaction);
-blockchain.mine(miner);
-console.log('yay')
+// const signer = signing.createPrivateKey();
+
+// const recipient = signing.getPublicKey(signing.createPrivateKey());
+
+// const amount = Math.ceil(Math.random() * 100);
+
+// let transaction = new MineableTransaction(signer, recipient, amount);
+
+// let miner = signing.createPrivateKey();
+
+// blockchain.addTransaction(transaction);
+// blockchain.mine(miner);
+// console.log('yay')
+
+
+
 /**
 /**
  * A new validation function for our mineable blockchains. Forget about all the
@@ -183,23 +194,76 @@ console.log('yay')
  */
 const isValidMineableChain = blockchain => {
 
-  // Iterate through blockchain starting at Index 1 to skip the genesis block
+  // Use an object to store the balances....Which is not space efficient
+  const balances = {};
+  // Iterate through blockchain blocks starting at Index 1 to skip the genesis block
+  for (let i = 1; i < blockchain.blocks.length; i += 1) {
+    const block = blockchain.blocks[i];
     // Return false if hash does not match requirements
     // Consider using the String.repeat([count]) and String.substring from above
+    if (block.hash.substring(0, blockchain.difficulty) !== '0'.repeat(blockchain.difficulty)) {
+      return false;
+    }
     // Define variable for count of reward transactions
+    let count = 0;
     // Iterate through transactions of current block
+    for (let j = 0; j < block.transactions.length; j += 1) {
+      const transaction = block.transactions[j];
+      const recipient = transaction.recipient;
+      const amount = transaction.amount;
       // If count is greater than 1
-        // return false
-      // Else If current transaction source is null
-        // If the amount is different than the reward amount
+      if (transaction.source === null) {
+        count += 1;
+        if (count > 1) {
           // return false
-      // Else If current transaction source would be negative
-        // return false
+          return false;
+        }
+        // This transaction is therefore a reward so increment the count of reward transactions for this block
 
+        // Add the recipient to the balance object if it is undefined
+        // Mutate/ add the reward amount to the recipient balance key/value
+
+        // transaction.source = a public key of the sender
+        // transaction.recipient = a public key of the recipient
+        // So if the source is not yet in balance then we can not add/subtract from that key/value pair
+        // balance[transaction.source] -= transaction.amount
+        // balance[transaction.recipient] += transaction.amount
+
+        // aka balance[source] = (balance[source] === undefined) ? 0 - amount : balance[source] - amount
+
+        //                key: value,
+        //        'publickey': balance,
+
+        //  balances = {
+        //               'bob':100,
+        //               'jon':0,
+        //             }
+        // balances['bob'] = (balances['bob'] == undefined) ? 0 + amount : balances['bob'] + amount;
+        balances[recipient] = (balances[recipient] == undefined) ? 0 + amount : balances[recipient] + amount;
+
+        // If the amount is different than the reward amount
+        if (transaction.amount !== blockchain.reward) {
+          // return false
+          return false;
+        }
+      } else {
+        // This is a normal transaction
+        const source = transaction.source;
+        // Add the recipient to the balance object if it is undefined
+        balances[recipient] = (balances[recipient] == undefined) ? 0 + amount : balances[recipient] + amount;
+        balances[source] = (balances[source] == undefined) ? 0 - amount : balances[source] - amount;
+        // Check that the source is not negative
+        if (balances[source] < 0) {
+          // return false if it is negative
+          return false;
+        }
+      }
+    }
+  }
   // Otherwise after all its a valid chain
-  // return true
-
+  return true
 };
+
 
 module.exports = {
   MineableTransaction,

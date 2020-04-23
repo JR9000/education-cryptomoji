@@ -39,8 +39,6 @@ const createPrivateKey = () => {
  *   not hex strings! You'll have to convert the private key.
  */
 const getPublicKey = privateKey => {
-  // Your code here
-
   return secp256k1.publicKeyCreate(Buffer.from(privateKey, 'hex')).toString('hex');
 };
 //console.log(getPublicKey('833bef782c37e89af81c94cd91afda1f8d815a26c11098c217552581edde8a1c'))
@@ -58,12 +56,10 @@ const getPublicKey = privateKey => {
  *   not the message itself!
  */
 const sign = (privateKey, message) => {
-  // Your code here
-  const hash = createHash('sha256').update(message).digest();
-  const sigObj = secp256k1.sign(hash, Buffer.from(privateKey, 'hex'));
+  const msgHash = createHash('sha256').update(message).digest();
+  const sigObj = secp256k1.sign(msgHash, Buffer.from(privateKey, 'hex'));
   return sigObj.signature.toString('hex');
 };
-//console.log(sign(createPrivateKey(), 'Hello World'));
 
 
 
@@ -78,7 +74,6 @@ const sign = (privateKey, message) => {
  *   // false
  */
 const verify = (publicKey, message, signature) => {
-  // Your code here
   const msgHash = createHash('sha256').update(message).digest();
   const sig = Buffer.from(signature, 'hex');
   const pub = Buffer.from(publicKey, 'hex');

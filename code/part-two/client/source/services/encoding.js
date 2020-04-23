@@ -13,8 +13,21 @@
  *   deterministically! JSON is convenient, but you will need to sort
  *   your object's keys or random transactions may fail.
  */
-export const encode = object => {
-  // Enter your solution here
+ export const encode = object => {
+  // Declare variable for output object aka sorted object
+  const output = {};
+  // Declare a variable to store the keys so that we can sort the object
+  // iterate through the original object
+  // Store current key
+  // Sort keys
+ const keys = Object.keys(object).sort();
+  // Build new object
+  for (let key of keys) {
+    output[key] = object[key];
+  }
+
+  // return output object as a Buffer
+  return Buffer.from(JSON.stringify(output));
 
 };
 
@@ -28,6 +41,5 @@ export const encode = object => {
  *   base64 string -> Buffer -> JSON string -> object
  */
 export const decode = base64Str => {
-  // Your code here
-
+  return JSON.parse(Buffer.from(base64Str, 'base64').toString());
 };

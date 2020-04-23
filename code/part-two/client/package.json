@@ -8,7 +8,7 @@
     "build:prod": "webpack --mode production",
     "build:test": "webpack --config tests/webpack.config.js --mode development -w",
     "watch": "npm run build:dev & live-server public --entry-file=index.html",
-    "test": "npm run build:test & live-server --port=8888 --open=tests/"
+    "test": "npm run build:test & live-server --port=9000 --open=tests/"
   },
   "repository": {
     "type": "git",

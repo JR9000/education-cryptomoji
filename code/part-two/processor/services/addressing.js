@@ -23,11 +23,13 @@ const PREFIXES = {
  *   console.log(address);
  *   // '5f4d7600ecd7ef459ec82a01211983551c3ed82169ca5fa0703ec98e17f9b534ffb797'
  */
+// sha256=64bits sha512=128bit while the expected address is 70
 const getCollectionAddress = publicKey => {
   // Enter your solution here
+  return createHash('sha512').update(publicKey).digest('hex');
 
 };
-
+console.log(getCollectionAddress('this'));
 /**
  * A function that takes a public key and a moji dna string, returning the
  * corresponding moji address.
