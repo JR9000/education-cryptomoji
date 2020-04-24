@@ -8,6 +8,8 @@ const PREFIXES = {
   SIRE_LISTING: '02',
   OFFER: '03'
 };
+
+const hash = (message, length) => createHash('sha512').update(message).digest('hex').slice(0, length);
 /**
  * A function which optionally takes a public key, and returns a full or
  * partial collection address.
@@ -26,8 +28,10 @@ const PREFIXES = {
  */
 export const getCollectionAddress = (publicKey = null) => {
   // Enter your solution here
-
-
+  if (publicKey == null) {
+    return NAMESPACE + PREFIXES.COLLECTION;
+  }
+  return NAMESPACE + PREFIXES.COLLECTION + hash(publicKey, 62);
 };
 
 /**
@@ -44,6 +48,15 @@ export const getCollectionAddress = (publicKey = null) => {
  */
 export const getMojiAddress = (ownerKey = null, dna = null) => {
   // Your code here
+  let address = '';
+  if (ownerKey == null && dna == null) {
+    address = NAMESPACE + PREFIXES.MOJI;
+  } else if (dna == null) {
+    address = NAMESPACE + PREFIXES.MOJI + hash(ownerKey, 8);
+  } else {
+    address = NAMESPACE + PREFIXES.MOJI + hash(ownerKey, 8) + hash(dna, 54);
+  }
+  return address;
 
 };
 
@@ -56,7 +69,10 @@ export const getMojiAddress = (ownerKey = null, dna = null) => {
  */
 export const getSireAddress = (ownerKey = null) => {
   // Your code here
-
+  if (ownerKey == null) {
+    return NAMESPACE + PREFIXES.SIRE_LISTING;
+  }
+  return NAMESPACE + PREFIXES.SIRE_LISTING + hash(ownerKey, 62);
 };
 
 /**

@@ -11,6 +11,8 @@ const PREFIXES = {
   OFFER: '03'
 };
 
+const hash = (message, length) => createHash('sha512').update(message).digest('hex').slice(0, length);
+
 /**
  * A function that takes a public key and returns the corresponding collection
  * address.
@@ -26,16 +28,16 @@ const PREFIXES = {
 // sha256=64bits sha512=128bit while the expected address is 70
 const getCollectionAddress = publicKey => {
   // Enter your solution here
-  return createHash('sha512').update(publicKey).digest('hex');
+  return NAMESPACE + PREFIXES.COLLECTION + hash(publicKey, 62)
 
 };
-console.log(getCollectionAddress('this'));
 /**
  * A function that takes a public key and a moji dna string, returning the
  * corresponding moji address.
  */
 const getMojiAddress = (ownerKey, dna) => {
   // Your code here
+  return NAMESPACE + PREFIXES.MOJI + hash(ownerKey, 8) + hash(dna, 54);
 
 };
 
@@ -44,8 +46,8 @@ const getMojiAddress = (ownerKey, dna) => {
  * listing address.
  */
 const getSireAddress = ownerKey => {
-  // Your code here
 
+  return NAMESPACE + PREFIXES.SIRE_LISTING + hash(ownerKey, 62);
 };
 
 /**
@@ -78,6 +80,16 @@ const getOfferAddress = (ownerKey, addresses) => {
  */
 const isValidAddress = address => {
   // Your code here
+  // return false if not typeof string
+  let re = /^[0-9A-Fa-f]+$/;
+  if (typeof address !== 'string') return false;
+  // return false if length is not 70
+  if (address.length !== 70) return false;
+  // return false if the namespace does not matchup
+  if (address.substring(0, NAMESPACE.length) !== NAMESPACE)return false;
+  // Otherwise return true
+  if (!re.test(address)) return false;
+  return true;
 
 };
 
