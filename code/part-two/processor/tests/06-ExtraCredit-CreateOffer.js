@@ -14,7 +14,7 @@ const Context = require('./services/mock_context');
 
 
 // EXTRA CREDIT: Remove `.skip` to test
-describe.skip('Create Offer', function() {
+describe('Create Offer', function() {
   let handler = null;
   let context = null;
   let privateKey = null;

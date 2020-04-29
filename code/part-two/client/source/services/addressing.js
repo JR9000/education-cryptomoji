@@ -89,5 +89,12 @@ export const getSireAddress = (ownerKey = null) => {
  */
 export const getOfferAddress = (ownerKey = null, moji = null) => {
   // Your code here
+  if (ownerKey == null && moji == null)return NAMESPACE + PREFIXES.OFFER;
 
+  if (moji == null)return NAMESPACE + PREFIXES.OFFER + hash(ownerKey, 8);
+
+  if (!Array.isArray(moji))moji = [moji];
+  const addressHash = hash(moji.sort().join('')).slice(0, 54);
+  const ownerHash  = hash(ownerKey, 8);
+  return NAMESPACE + PREFIXES.OFFER + ownerHash + addressHash;
 };

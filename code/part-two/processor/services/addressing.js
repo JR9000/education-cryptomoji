@@ -63,7 +63,12 @@ const getSireAddress = ownerKey => {
  */
 const getOfferAddress = (ownerKey, addresses) => {
   // Your code here
-
+  // Declare variables
+  // Determine if addresses is an array
+  if (!Array.isArray(addresses))addresses = [addresses];
+  const addressHash = hash(addresses.sort().join('')).slice(0, 54);
+  const ownerHash  = hash(ownerKey, 8);
+  return NAMESPACE + PREFIXES.OFFER + ownerHash + addressHash;
 };
 
 /**
